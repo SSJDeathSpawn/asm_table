@@ -1,0 +1,11 @@
+ORG 0000H,,0,0
+CLR P2.0,Direct,2,1
+"MOV TMOD, #20H ","Direct, Immediate",3,2
+"MOV TL1,  #0BEH","Direct, Immediate",3,2
+"MOV TH1, #0BEH","Direct, Immediate",3,2
+BACK: SETB TR1,Direct,2,1
+"AGAIN: JNB TF1, AGAIN","Direct, Direct",3,2
+CLR TF1,Direct,2,1
+CPL P2.0,Direct,2,1
+SJMP BACK,Direct,2,2
+END,,0,0
