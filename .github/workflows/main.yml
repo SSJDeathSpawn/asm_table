@@ -25,6 +25,7 @@ jobs:
         run: |
           cd target/release
           Compress-Archive -Path .\asm_table.exe -DestinationPath .\asm_table.zip
+        if: matrix.os == 'windows-latest'
       - name: Upload Linux
         uses: actions/upload-artifact@v3
         with:
@@ -36,6 +37,7 @@ jobs:
         with:
           name: asm_table.zip
           path: target/release/asm_table.zip
+        if: matrix.os == 'windows-latest'
   release:
     runs-on: ubuntu-latest
     needs: build
