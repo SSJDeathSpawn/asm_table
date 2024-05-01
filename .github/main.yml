@@ -1,0 +1,64 @@
+name: Build and Release
+on:
+  push:
+    tags:
+      - "v*.*.*"
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    name: build
+    runs_on: ${{ matrix.os }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+      - run: cargo build --release
+      - name: Package Linux
+        run: |
+          cd target/release
+          tar cvfz asm_table.tar.gz asm_table
+        if: matrix.os == 'ubuntu-latest'
+      - name: Package Windows
+        run: |
+          cd target/release
+          Compress-Archive -Path .\asm_table.exe -DestinationPath .\asm_table.zip
+      - name: Upload Linux
+        uses: actions/upload-artifact@v3
+        with:
+          name: asm_table.tar.gz
+          path: target/release/asm_table.tar.gz
+        if: matrix.os == 'ubuntu-latest'
+      - name: Upload Windows
+        uses: actions/upload-artifact@v3
+        with:
+          name: asm_table.zip
+          path: target/release/asm_table.zip
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Download Files
+        uses: actions/download-artifact@v3
+      - name: Show files
+        run: ls
+      - name: Make Release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          files: |
+            ./asm_table.tar.gz
+            ./asm_table.zip
+  clean:
+    runs-on: ubuntu-latest
+    needs: release
+    steps:
+      - uses: geekyeggo/delete-artifact@v2
+        with:
+          name: asm_table.*
+
